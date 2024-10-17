@@ -12,13 +12,16 @@ use Illuminate\Support\Facades\Hash;
 class SocialiteController extends Controller
 {
     /**
-     * Function: googleLogin
-     * Description: This function will redirect to Google
+     * Function: authProviderRedirect
+     * Description: This function will redirect to Given Provider
      * @param NA
      * @return void
      */
-    public function googleLogin() {
-        return Socialite::driver('google')->redirect();
+    public function authProviderRedirect($provider) {
+        if ($provider) {
+            return Socialite::driver($provider)->redirect();
+        }
+        abort(404);
     }
 
     /**
@@ -27,28 +30,34 @@ class SocialiteController extends Controller
      * @param NA
      * @return void
      */
-    public function googleAuthentication() {
+    public function socialAuthentication($provider) {
         try {
-            $googleUser = Socialite::driver('google')->user();
+            if ($provider) {
+                $socialUser = Socialite::driver($provider)->user();
 
-            $user = User::where('google_id', $googleUser->id)->first();
+                $user = User::where('auth_provider_id', $socialUser->id)->first();
 
-            if ($user) {
-                Auth::login($user);
-                return redirect()->route('dashboard');
-            } else {
-                $userData = User::create([
-                    'name' => $googleUser->name,
-                    'email' => $googleUser->email,
-                    'password' => Hash::make('Password@1234'),
-                    'google_id' => $googleUser->id,
-                ]);
+                if ($user) {
+                    Auth::login($user);
 
-                if ($userData) {
-                    Auth::login($userData);
-                    return redirect()->route('dashboard');
+                } else {
+                    $userData = User::create([
+                        'name' => $socialUser->name,
+                        'email' => $socialUser->email,
+                        'password' => Hash::make('Password@1234'),
+                        'auth_provider_id' => $socialUser->id,
+                        'auth_provider' => $provider,
+                    ]);
+
+                    if ($userData) {
+                        Auth::login($userData);
+                    }
                 }
+
+                return redirect()->route('dashboard');
             }
+            abort(404);
+
         } catch (Exception $e) {
             dd($e);
         }
