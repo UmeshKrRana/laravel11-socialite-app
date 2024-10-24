@@ -65,6 +65,11 @@
             <a title="Login with Facebook" href="{{ route('auth.redirection', 'facebook') }}" class="social-link inline-block px-3 py-2 rounded-lg shadow">
                 <img src="{{ asset('assets/icons/facebook.jpeg') }}" />
             </a>
+
+            {{-- Login with Github --}}
+            <a title="Login with Github" href="{{ route('auth.redirection', 'github') }}" class="social-link inline-block px-3 py-2 rounded-lg shadow">
+                <img src="{{ asset('assets/icons/github.png') }}" />
+            </a>
         </div>
 
     </form>
